@@ -1,0 +1,24 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+def app_obj():
+    app = Flask(__name__)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://rey:rey@127.0.0.1/flask_react_mysql'
+    app.config["SQLALCHEMY_ECHO"] = True
+    app.config["SQLALCHEMY_RECORD_QUERIES"] = True    
+    db.init_app(app)
+
+    # this is needed in order for database session calls (e.g. db.session.commit)
+    with app.app_context():
+      try:
+          db.create_all()
+      except Exception as exception:
+          print("got the following exception when attempting db.create_all() in __init__.py: " + str(exception))
+      finally:
+        print("db.create_all() in __init__.py was successfull - no exceptions were raised")
+        from models import Products
+
+    return app

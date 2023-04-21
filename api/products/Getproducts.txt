@@ -1,0 +1,54 @@
+from flask_restful import Resource,reqparse
+from sqlalchemy import create_engine, text, select
+from models import Products
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import text
+from sqlalchemy.orm import Session
+
+from config import DATABASE_URI
+
+class xGetproductsHandler(Resource):  
+  def get(self):
+    try:
+        conn = create_engine(DATABASE_URI)
+        print("connected..")
+    except SQLAlchemyError as err:
+        print("error", err.__cause__)         
+    # conn.connect()
+
+    with Session(conn) as session:
+        stm = select(Products) #.filter_by(id="1")
+        prods = session.scalars(stm).all()   #.paginate(page=1, per_page=5)
+        products=[]
+        data =[]
+        ln = 0
+        for product in prods:
+            products.append(product)
+            data.append({'id': products[ln].id, 'descriptions': products[ln].descriptions,'qty': products[ln].qty,'unit': products[ln].unit,'cost_price': str(products[ln].cost_price),'sell_price': str(products[ln].sell_price),'prod_pic': products[ln].prod_pic,'sale_price': str(products[ln].sale_price),'category': products[ln].category,'alert_level': products[ln].alert_level,'critical_level': products[ln].critical_level})
+            ln=ln+1
+        return data
+
+    # page = request.args.get('page', type=int)
+    # perpage = request.args.get('perpage', type=int)
+
+    # prods = Products.query.all()
+    # for products in prods:
+    #     return products
+    # result=conn.execute("SELECT * FROM products")
+    # return result
+
+
+    # conn = db_connection()
+    # cursor = conn.cursor()
+    # products=cursor.execute("SELECT * FROM products LIMIT %s OFFSET %s",(perpage,page))
+    # results = cursor.fetchall()
+    # if (products):
+    #     return jsonify(results)
+
+    # return {
+    #   'statuscode': 404,
+    #   'message': 'No records found.'
+    #   }, 404
+      
+
+
